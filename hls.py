@@ -2,47 +2,58 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
-# Function to extract HLS m3u8 URLs from tsports.com
-def get_hls_urls():
-    page_url = "https://tsports.com/"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-    }
+# Updated website URL
+PAGE_URL = "https://live.tsports.com/"
 
-    # Fetch the webpage content
-    response = requests.get(page_url, headers=headers)
-    if response.status_code != 200:
-        print("Failed to retrieve webpage.")
+# Headers to mimic a real browser
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+}
+
+# Function to fetch HLS stream URLs
+def get_hls_urls():
+    print(f"Fetching webpage: {PAGE_URL}")
+    try:
+        response = requests.get(PAGE_URL, headers=HEADERS, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching page: {e}")
         return []
 
-    # Parse the HTML content
+    print(f"Response Code: {response.status_code}")
     soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # Find all script tags to look for m3u8 links (sometimes they are in JavaScript variables)
-    m3u8_urls = []
-    for script in soup.find_all('script'):
-        if script.string:
-            urls = re.findall(r'https?://[^\s"]+\.m3u8', script.string)
-            m3u8_urls.extend(urls)
 
-    return m3u8_urls
+    # Find all potential HLS URLs
+    m3u8_urls = set()
+    for script in soup.find_all("script"):
+        if script.string:
+            found_urls = re.findall(r'https?://[^\s"]+\.m3u8[^\s"]*', script.string)
+            m3u8_urls.update(found_urls)
+
+    if not m3u8_urls:
+        print("No HLS streams found.")
+    else:
+        print(f"Found {len(m3u8_urls)} HLS streams!")
+
+    return list(m3u8_urls)
 
 # Function to generate M3U playlist
 def generate_m3u_playlist(m3u8_urls):
-    m3u_playlist = "#EXTM3U\n"
+    if not m3u8_urls:
+        print("No valid streams to write.")
+        return None
 
+    playlist_content = "#EXTM3U\n"
     for index, url in enumerate(m3u8_urls):
-        m3u_playlist += f"#EXTINF:-1, T-Sports Stream {index + 1}\n{url}\n"
+        playlist_content += f"#EXTINF:-1, T-Sports Stream {index + 1}\n{url}\n"
 
-    return m3u_playlist
-
-# Main execution
-m3u8_urls = get_hls_urls()
-
-if m3u8_urls:
-    playlist = generate_m3u_playlist(m3u8_urls)
-    with open('playlist.m3u', 'w') as file:
-        file.write(playlist)
+    with open("playlist.m3u", "w") as file:
+        file.write(playlist_content)
+    
     print("M3U Playlist generated successfully!")
-else:
-    print("No streams found.")
+    return "playlist.m3u"
+
+# Main Execution
+if name == "main":
+    hls_urls = get_hls_urls()
+    generate_m3u_playlist(hls_urls)
