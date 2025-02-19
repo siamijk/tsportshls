@@ -20,7 +20,7 @@ def update_time():
 
 def update_live_event_info():
     headers = {
-        "Host": os.getenv("API_HOST", "mapi-cdn.tsports.com"),
+        "Host": os.getenv("API_HOST", "vod.tsports.com"),
         "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
     }
     
