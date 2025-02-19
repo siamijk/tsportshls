@@ -1,24 +1,33 @@
-name: Generate M3U Playlist
+name: Run M3U URL Grabber
 
-on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '0 * * * *'  # Runs every hour
+on: push: branches: - main schedule: - cron: '0 * * * *'  # Runs every hour workflow_dispatch:  # Allows manual triggering
 
-jobs:
-  generate_playlist:
-    runs-on: ubuntu-latest
+jobs: run_script: runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests beautifulsoup4
+  - name: Set up Python
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.x'
 
-    - name: Run script
-      run: python3 hls.py
+  - name: Install Dependencies
+    run: |
+      pip install requests pytz
+
+  - name: Run Script
+    env:
+      api_live_matches: ${{ secrets.API_LIVE_MATCHES }}
+    run: python main.py
+
+  - name: Upload Generated Files
+    uses: actions/upload-artifact@v4
+    with:
+      name: m3u-playlists
+      path: |
+        TSports_m3u8_headers.Json
+        NS_Player_Tsports_live.m3u
+        OTT_Navigator_Tsports_live.m3u
+
