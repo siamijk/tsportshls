@@ -60,18 +60,39 @@ def update_live_event_info():
     
     return all_data
 
+def json_formatter(name, output_file_name, data):
+    with open(output_file_name, "w") as w:
+        json.dump({"name": name, "channels": data}, w, indent=2)
+
+def ns_player_playlist_converter(output_file_name, json_data):
+    all_data_ns = [{
+        "name": data["name"],
+        "link": data["link"],
+        "logo": data["logo"],
+        "origin": "https://" + data["headers"]["Host"],
+        "cookie": data["headers"]["Cookie"]
+    } for data in json_data]
+    
+    with open(output_file_name, "w") as w:
+        json.dump(all_data_ns, w, indent=2)
+
+def ott_navigator_playlist_converter(output_file_name, json_data):
+    final_text = "".join(
+        f'#EXTINF:-1 group-title="{content["category_name"]}" tvg-logo="{content["logo"]}", {content["name"]}\n'
+        f'#EXTVLCOPT:http-user-agent={content["headers"]["User-Agent"]}\n'
+        f'#EXTHTTP:{{"cookie":"{content["headers"]["Cookie"]}"}}\n'
+        f'{content["link"]}\n' for content in json_data
+    )
+    
+    with open(output_file_name, "w") as w:
+        w.write(final_text)
+        
 if __name__ == "__main__":
-    # Update Live Event Data
     data = update_live_event_info()
     
-    # Convert to JSON Format
     json_formatter("TSports App All Live Matches Data", "TSports_m3u8_headers.Json", data)
-    
-    # Convert to NS Player Playlist
     ns_player_playlist_converter("NS_Player_Tsports_live.m3u", data)
-    
-    # Convert to OTT Navigator Playlist
     ott_navigator_playlist_converter("OTT_Navigator_Tsports_live.m3u", data)
     
     print("Playlist files generated successfully!")
-                        
+                                             
