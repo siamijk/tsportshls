@@ -52,7 +52,7 @@ def update_live_event_info():
                             "link": link,
                             "headers": {
                                 "Cookie": cookie,
-                                "Host": os.getenv("STREAM_HOST", "live-cdn.tsports.com"),
+                                "Host": os.getenv("STREAM_HOST", "live.tsports.com"),
                                 "User-Agent": "https://github.com/byte-capsule (Linux;Android 14)"
                             }
                         }
