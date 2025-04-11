@@ -76,7 +76,7 @@ def update_live_event_info():
                         "headers":{
                         "Cookie":cookie,
                         "Host":urlparse(stream_url).netloc,
-                        "User-agent":"https://github.com/byte-capsule (Linux;Android 14)"}}
+                        "User-agent":"https://github.com/siamijk (Linux;Android 14)"}}
                 all_data.append(data)
                 
         
