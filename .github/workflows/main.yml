@@ -1,13 +1,8 @@
 name: run script main.py
 
 on:
-  push:
-    branches:
-      - main
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:  # Allows manual triggering
-
+    - cron: '0 */3 * * *' # Runs every 12 Hours
 
 jobs:
   build:
@@ -20,7 +15,7 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9' # install the python version needed
+          python-version: '3.12' # install the python version needed
           
       - name: install python packages
         run: |
@@ -28,6 +23,12 @@ jobs:
           pip install -r requirements.txt
           
       - name: execute py script # run main.py
+        env:
+          api_live_matches: ${{ secrets.api_live_matches }}
+          API_PROXIES: ${{ secrets.api_proxies }}
+          file_password: ${{ secrets.file_password }}
+          password: ${{ secrets.password }}
+
 
         run: python main.py
           
